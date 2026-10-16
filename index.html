@@ -1,0 +1,655 @@
+<title>Class 1 Post-Read</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky chapter bar, then one long reading column with interactive "desk" widgets.
+   Palette: carrier-label world. Navy ink, signal blue, tape yellow, plus green/red for pass/fail. Single light look. */
+:root{
+  --bg:#F5F7FB; --surface:#FFFFFF; --ink:#16233B; --muted:#56627C; --line:#D9DFEB;
+  --blue:#2A63D8; --blue-soft:#E6EDFC; --tape:#F5C531; --tape-soft:#FFF3C9;
+  --ok:#17825A; --ok-soft:#E2F4EA; --bad:#C23B3B; --bad-soft:#FCE8E8;
+  --code-bg:#EEF2F9; --kw:#2A63D8; --str:#17825A; --cmt:#74809A; --num:#B24F12;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:960px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.7rem,4vw,2.3rem);font-weight:800;letter-spacing:-.02em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0 0 .9em;max-width:68ch}
+a{color:var(--blue)}
+code,.mono{font-family:var(--mono);font-size:.9em}
+:not(pre)>code{background:var(--code-bg);padding:.1em .35em;border-radius:4px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button{font:inherit;cursor:pointer}
+
+/* chapter bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));
+  padding:0 max(16px,env(safe-area-inset-left,0px));background:rgba(245,247,251,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:960px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:thin}
+.bar a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:.85rem;font-weight:500;padding:5px 11px;border-radius:99px;border:1px solid transparent}
+.bar a:hover{color:var(--ink);background:var(--blue-soft)}
+.bar a.on{background:var(--ink);color:#fff}
+.prog{height:3px;background:var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+.prog i{display:block;height:100%;width:0;background:var(--tape)}
+
+/* hero */
+.hero{padding:56px 0 40px;display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:clamp(2.3rem,6.4vw,4rem);font-weight:800;letter-spacing:-.03em}
+.hero h1 mark{background:linear-gradient(transparent 58%,var(--tape) 58%);color:inherit;padding:0 .08em}
+.lede{font-size:1.15rem;color:var(--muted);margin:18px 0 22px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font-size:.82rem;padding:4px 11px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.label-card{background:var(--surface);border:2px solid var(--ink);border-radius:6px;padding:0;box-shadow:6px 6px 0 var(--tape);transform:rotate(1.2deg);max-width:340px;justify-self:center;width:100%}
+.label-card .top{background:var(--ink);color:#fff;padding:8px 14px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;letter-spacing:.06em}
+.label-card .mid{padding:14px;font-family:var(--mono);font-size:.88rem;display:grid;gap:4px}
+.label-card .mid b{font-family:var(--display);font-size:1.7rem;letter-spacing:-.01em}
+.label-card .late{margin:0 14px 14px;padding:8px 10px;background:var(--bad-soft);color:var(--bad);font-weight:600;border:1px dashed var(--bad);border-radius:4px;font-family:var(--mono);font-size:.85rem}
+.bars{height:26px;margin:0 14px 14px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px)}
+
+section{padding:48px 0 8px;scroll-margin-top:64px}
+.kicker{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.intro{color:var(--muted);margin:12px 0 26px;max-width:62ch}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.row{display:grid;gap:18px}
+.two{grid-template-columns:1fr 1fr}
+.three{grid-template-columns:repeat(3,1fr)}
+.two>*,.three>*{min-width:0}
+
+/* playground */
+.desk{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+.desk>*{min-width:0}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:600}
+.btn:hover{background:#243759}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--blue-soft)}
+.sw{display:flex;gap:8px;align-items:center;font-size:.92rem;color:var(--muted)}
+.sw input{width:18px;height:18px;accent-color:var(--blue)}
+.cases{display:grid;gap:8px}
+.cc{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface);transition:background .25s,border-color .25s}
+.cc .id{font-family:var(--mono);font-weight:500;font-size:.88rem}
+.cc .st{font-size:.82rem;color:var(--muted);line-height:1.35}
+.cc .st b{color:var(--ink);font-weight:600}
+.tag{font-family:var(--mono);font-size:.72rem;padding:3px 8px;border-radius:99px;background:var(--code-bg);color:var(--muted);white-space:nowrap}
+.cc.flag{border-left-color:var(--bad);background:var(--bad-soft)}
+.cc.flag .tag{background:var(--bad);color:#fff}
+.cc.closed{border-left-color:var(--ok)}
+.cc.closed .tag{background:var(--ok-soft);color:var(--ok)}
+.cc.ontime{border-left-color:var(--blue)}
+.cc.ontime .tag{background:var(--blue-soft);color:var(--blue)}
+.tally{margin-top:12px;font-weight:600}
+
+/* code */
+.code{min-width:0;max-width:100%;position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;margin:0}
+.code pre{margin:0;padding:16px 16px 16px;overflow-x:auto;font-family:var(--mono);font-size:.84rem;line-height:1.65;tab-size:4}
+.code .cp{position:absolute;top:8px;right:8px;font-size:.74rem;padding:3px 9px;border-radius:6px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.code .cp:hover{color:var(--ink);background:var(--blue-soft)}
+.k{color:var(--kw);font-weight:500}.s{color:var(--str)}.c{color:var(--cmt);font-style:italic}.n{color:var(--num)}
+.hl{background:var(--tape-soft);outline:1px solid var(--tape);border-radius:3px}
+
+/* path */
+.path{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s}
+.path li{position:relative;padding:0 0 22px 54px;counter-increment:s}
+.path li::before{content:counter(s);position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:700}
+.path li::after{content:"";position:absolute;left:17px;top:38px;bottom:2px;width:2px;background:var(--line)}
+.path li:last-child::after{display:none}
+.path li:last-child{padding-bottom:0}
+.path b{font-family:var(--display);font-size:1.1rem}
+.path span{display:block;color:var(--muted);font-size:.93rem}
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:6px 0 4px}
+.flow .node{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.9rem}
+.flow .node b{display:block;font-family:var(--display);font-size:1rem;margin-bottom:2px}
+.flow .node.hot{border-color:var(--ink);box-shadow:4px 4px 0 var(--tape)}
+.flow .arr{align-self:center;color:var(--muted);font-family:var(--mono)}
+
+/* concept explorer */
+.explore{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start}
+.explore>*{min-width:0}
+.tabs{display:grid;gap:6px}
+.tab{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-weight:500;color:var(--ink)}
+.tab small{display:block;color:var(--muted);font-weight:400;font-size:.78rem}
+.tab:hover{background:var(--blue-soft)}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab[aria-selected="true"] small{color:#C9D3E8}
+.cp-panel h3{font-size:1.5rem;margin-bottom:8px}
+.say{border-left:4px solid var(--tape);background:var(--tape-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0}
+.say b{font-size:.76rem;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:block;color:#7A5B00}
+.rem{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.rem li{padding-left:26px;position:relative}
+.rem li::before{content:"";position:absolute;left:4px;top:.55em;width:10px;height:10px;border-radius:2px;background:var(--blue)}
+
+/* traceback */
+.tb{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;gap:4px}
+.tbl{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;padding:7px 8px;color:var(--ink);width:100%}
+.tbl:hover{background:var(--surface)}
+.tbl[aria-pressed="true"]{background:var(--surface);border-color:var(--ink);box-shadow:3px 3px 0 var(--tape)}
+.tbl .bd{width:26px;height:26px;border-radius:50%;background:var(--line);color:var(--muted);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.85rem}
+.tbl[aria-pressed="true"] .bd{background:var(--ink);color:#fff}
+.tbl code{white-space:pre-wrap;word-break:break-word;background:none;padding:0;font-size:.82rem}
+.tbn{min-height:92px;margin-top:12px}
+
+/* tables */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.92rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--ink);color:#fff;font-weight:600;font-size:.82rem;letter-spacing:.03em}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+
+/* grounding demo */
+.note-box{background:var(--tape-soft);border:1px dashed #C9A200;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:.9rem}
+.note-box mark{background:var(--tape);padding:0 2px;border-radius:2px}
+input[type=text],textarea{width:100%;font:inherit;font-family:var(--mono);font-size:.9rem;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface);color:var(--ink)}
+textarea{font-family:var(--body);min-height:96px;resize:vertical}
+.verdict{display:inline-block;font-family:var(--mono);font-weight:500;padding:5px 12px;border-radius:6px;margin-top:10px}
+.verdict.t{background:var(--ok-soft);color:var(--ok)}.verdict.f{background:var(--bad-soft);color:var(--bad)}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+.rules>div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:.9rem;min-width:0}
+.rules b{display:block;font-family:var(--display);margin-bottom:4px}
+.split{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--surface)}
+.split>div{padding:16px 18px;min-width:0}
+.split>div+div{border-left:2px dashed var(--ink);background:var(--tape-soft)}
+.split b{font-family:var(--display);font-size:1.15rem;display:block;margin-bottom:4px}
+
+/* quiz */
+.q{margin-bottom:16px}
+.q .qh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.q .qt{font-weight:600;margin-bottom:10px}
+.opts{display:grid;gap:8px;margin:12px 0}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--surface)}
+.opt:hover{background:var(--blue-soft)}
+.opt input{margin-top:.3em;width:17px;height:17px;accent-color:var(--blue);flex:none}
+.opt span{min-width:0;overflow-wrap:anywhere}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:.93rem}
+.fb.good{background:var(--ok-soft);color:#0E5C3D}.fb.bad{background:var(--bad-soft);color:#8A2626}
+.score{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;border-radius:99px;padding:8px 18px;font-weight:600;width:max-content;max-width:100%;margin:10px auto 0;font-size:.92rem}
+
+/* practice */
+.task{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:10px;overflow:hidden}
+.task summary{cursor:pointer;padding:12px 16px;display:flex;gap:12px;align-items:baseline;font-weight:500;list-style:none}
+.task summary::-webkit-details-marker{display:none}
+.task summary .tool{margin-left:auto;font-family:var(--mono);font-size:.74rem;color:var(--muted);white-space:nowrap}
+.task summary .no{font-family:var(--display);font-weight:800;color:var(--blue)}
+.task[open] summary{background:var(--blue-soft)}
+.task .ans{padding:14px 16px;border-top:1px solid var(--line)}
+.task .ans .code{margin-bottom:10px}
+
+footer{margin-top:56px;padding:26px;background:var(--ink);color:#fff;border-radius:14px;display:grid;gap:8px}
+footer h2{color:#fff}
+footer p{color:#C9D3E8;margin:0}
+
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr;padding-top:36px}
+  .label-card{justify-self:start;transform:none}
+  .desk,.two,.explore{grid-template-columns:1fr}
+  .three{grid-template-columns:1fr}
+  .rules{grid-template-columns:1fr 1fr}
+  .tabs{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+}
+@media (max-width:520px){
+  .rules{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}
+  .split>div+div{border-left:0;border-top:2px dashed var(--ink)}
+  .cc{grid-template-columns:54px 1fr}
+  .cc .tag{grid-column:1 / -1;justify-self:start}
+  .task summary{flex-wrap:wrap}.task summary .tool{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+
+<div class="bar" id="bar"><div class="bar-in" id="chips"></div></div>
+<div class="prog"><i id="progfill"></i></div>
+
+<main class="wrap">
+
+<header class="hero" id="top">
+  <div>
+    <div class="eyebrow">FDE Module 2 · Class 1 · Post-Read</div>
+    <h1>Which cases need <mark>attention</mark> this morning?</h1>
+    <p class="lede">You answered that question with Python today. This page lets you replay it, poke at it, and check what stuck. Nothing here is graded.</p>
+    <div class="meta"><span class="pill">About 25 minutes</span><span class="pill">Python Foundations</span><span class="pill">Meridian Case Intake Workbench</span></div>
+  </div>
+  <div class="label-card" aria-hidden="true">
+    <div class="top"><span>MERIDIAN</span><span>BATCH 2025-03-10</span></div>
+    <div class="mid"><span>CASE</span><b>C-1002</b><span>ORDER O-5002 · SHIPPED</span><span>PROMISED 2025-03-07</span></div>
+    <div class="late">3 DAYS LATE · OVERDUE_NOT_CLOSED</div>
+    <div class="bars"></div>
+  </div>
+</header>
+
+<section id="try">
+  <div class="kicker">Replay</div>
+  <h2>Run the rule yourself</h2>
+  <p class="intro">These are the seven cases from the class batch, as they sit in <code>cases.csv</code>. Press the button and the rule from Section 8 decides each one. Then flip the switch to see what changes when <code>CANCELLED</code> is not treated as closed.</p>
+  <div class="desk">
+    <div class="panel">
+      <div class="ctl">
+        <button class="btn" id="run">Run the rule</button>
+        <button class="btn ghost" id="reset">Reset</button>
+        <label class="sw"><input type="checkbox" id="cancelled" checked> Treat CANCELLED as closed</label>
+      </div>
+      <div class="cases" id="caseList"></div>
+      <div class="tally" id="tally" aria-live="polite">Press Run to decide each case.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start;min-width:0">
+      <div class="code"><pre id="liveCode"></pre></div>
+      <p style="color:var(--muted);font-size:.92rem;margin:0">The code changes with the switch. Same function, same data, different set of closed statuses. That is why the set lives in one named place at the top of the file.</p>
+    </div>
+  </div>
+</section>
+
+<section id="built">
+  <div class="kicker">The big picture</div>
+  <h2>What you built today</h2>
+  <p class="intro">One small program that reads case data from two files, applies a rule that can be tested, and writes one evidence-backed result for every <code>case_id</code>.</p>
+  <div class="flow">
+    <div class="node"><b>cases.csv</b>7 rows, one per case</div><span class="arr">+</span>
+    <div class="node"><b>notes.json</b>3 free-text notes</div><span class="arr">→</span>
+    <div class="node hot"><b>needs_attention()</b>Python rule. Returns a flag and a reason</div><span class="arr">→</span>
+    <div class="node"><b>attention_report.json</b>One result per case_id, with evidence</div>
+  </div>
+  <div class="panel" style="margin-top:22px">
+    <h3 style="margin-bottom:16px">How the class climbed, in order</h3>
+    <ol class="path">
+      <li><b>Describe</b><span>A case became a dictionary. A batch became a list of dictionaries.</span></li>
+      <li><b>Decide</b><span>Loops, <code>if</code>, functions and assertions turned a plain-words rule into code you can prove.</span></li>
+      <li><b>Read the real files</b><span><code>pathlib</code>, <code>with open</code>, <code>csv</code> and <code>json</code> replaced hand-typed data.</span></li>
+      <li><b>Dates, results, main</b><span>Lateness was worked out from promised dates, results were saved as JSON, and the program got a front door.</span></li>
+      <li><b>Where rules stop</b><span>You read a recorded model response and wrote down what a good suggestion looks like.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="notebook">
+  <div class="kicker">Reference</div>
+  <h2>The concept notebook</h2>
+  <p class="intro">Pick a topic. Each one gives the idea in plain words, the code from class, and what to remember. Copy any block and run it.</p>
+  <div class="explore">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Concepts"></div>
+    <div class="panel cp-panel" id="cpanel" role="tabpanel"></div>
+  </div>
+</section>
+
+<section id="errors">
+  <div class="kicker">When it breaks</div>
+  <h2>Read the traceback from the bottom</h2>
+  <p class="intro">This is the error from class, when the rule met real data. Click each line to see what it tells you. The badges show the reading order.</p>
+  <div class="row two">
+    <div style="min-width:0">
+      <div class="tb" id="tb"></div>
+      <div class="panel tbn" id="tbn" aria-live="polite"></div>
+    </div>
+    <div style="min-width:0">
+      <h3 style="margin-bottom:10px">Errors you will meet again</h3>
+      <div class="scroll"><table>
+        <tr><th>Error</th><th>What it means</th><th>First thing to try</th></tr>
+        <tr><td><code>KeyError</code></td><td>The dictionary has no such label</td><td>Compare the spelling with the CSV header</td></tr>
+        <tr><td><code>NameError</code></td><td>A name was misspelt or never created</td><td>Fix the spelling or create it first</td></tr>
+        <tr><td><code>TypeError</code></td><td>Text and number mixed up</td><td>Convert one side, such as <code>int("3")</code></td></tr>
+        <tr><td><code>IndentationError</code></td><td>A block is missing its indent</td><td>Indent by four spaces</td></tr>
+        <tr><td><code>FileNotFoundError</code></td><td>The path is wrong</td><td>Print <code>Path.cwd()</code></td></tr>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section id="ai">
+  <div class="kicker">Where rules stop</div>
+  <h2>Python decides. The model suggests.</h2>
+  <p class="intro">Python can see that a note exists. It cannot read what the note means. That is the only gap a model is allowed to help with, and it never decides whether a case needs attention.</p>
+  <div class="split">
+    <div><b>Python decides</b>Is the order closed? Is it late? How many days? Same input, same answer, and you can test it.</div>
+    <div><b>The model suggests</b>What does "Held at depot awaiting address confirmation" mean? It offers an issue family and quotes its evidence.</div>
+  </div>
+
+  <h3 style="margin:30px 0 10px">Try the grounding check</h3>
+  <p class="intro" style="margin-top:0">A model must quote the exact words it relied on. One line of Python catches an invented quote. Edit the quote and watch the answer.</p>
+  <div class="panel">
+    <div class="note-box" id="noteBox"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 8px">
+      <button class="btn ghost" data-q="awaiting address confirmation">Real quote</button>
+      <button class="btn ghost" data-q="parcel was damaged in transit">Invented quote</button>
+      <button class="btn ghost" data-q="Awaiting Address Confirmation">Different capitals</button>
+    </div>
+    <label for="span" class="mono" style="font-size:.8rem;color:var(--muted)">evidence_span</label>
+    <input type="text" id="span" value="awaiting address confirmation" autocomplete="off" spellcheck="false">
+    <div id="verdict" aria-live="polite"></div>
+    <p style="margin:12px 0 0;color:var(--muted);font-size:.92rem">Python compares text exactly, so capital letters matter. True means the quote is really in the note. False means the suggestion is not grounded.</p>
+  </div>
+
+  <h3 style="margin:30px 0 10px">What makes a suggestion good</h3>
+  <div class="rules">
+    <div><b>Correct issue family</b>It picks the right category from the declared list.</div>
+    <div><b>Grounded evidence</b>The quoted words really appear in the note.</div>
+    <div><b>No invented fact</b>Nothing in the summary goes beyond the note.</div>
+    <div><b>Appropriate abstention</b>For "see previous" the right answer is "I cannot tell".</div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="kicker">Check yourself</div>
+  <h2>Six quick questions</h2>
+  <p class="intro">The same six checks from class. Some have one right answer, some have two. Answer, press Check, and read the reasons.</p>
+  <div id="quizBox"></div>
+  <div class="score" id="score" aria-live="polite">Score: 0 of 6</div>
+</section>
+
+<section id="practice">
+  <div class="kicker">Practice</div>
+  <h2>The take-home sheet</h2>
+  <p class="intro">Eight small tasks on the loaded cases, notes and results. Try each one in your own file first, then open the answer to compare.</p>
+  <div id="tasks"></div>
+</section>
+
+<section id="cheat">
+  <div class="kicker">Keep this</div>
+  <h2>Cheat sheet</h2>
+  <p class="intro">You do not need to memorise any of it. You need to recognise it and know what question it answers.</p>
+  <div class="scroll"><table>
+    <tr><th>Idea</th><th>What it looks like</th><th>The question it answers</th></tr>
+    <tr><td>Dictionary</td><td><code>case["case_id"]</code></td><td>What is stored under this label?</td></tr>
+    <tr><td>Safe lookup</td><td><code>notes_by_case.get("C-1004")</code></td><td>Is there a note? Gives <code>None</code> if not</td></tr>
+    <tr><td>List</td><td><code>cases[1]</code>, <code>cases[-1]</code></td><td>Which item is at this position?</td></tr>
+    <tr><td>Loop</td><td><code>for case in cases:</code></td><td>How do I do this for every case?</td></tr>
+    <tr><td>Decision</td><td><code>if a and b:</code></td><td>Are both things true?</td></tr>
+    <tr><td>Function</td><td><code>def needs_attention(case):</code></td><td>Can I name this rule and reuse it?</td></tr>
+    <tr><td>Return a pair</td><td><code>flag, reason = f(x)</code></td><td>How do I get an answer and its reason?</td></tr>
+    <tr><td>Assertion</td><td><code>assert f(x) == (True, "…")</code></td><td>Is this definitely true? Stop if not</td></tr>
+    <tr><td>Open a file</td><td><code>with open(path) as f:</code></td><td>How do I read a file and close it safely?</td></tr>
+    <tr><td>Set</td><td><code>{"DELIVERED", "CANCELLED"}</code></td><td>Which values appear, or is this one of them?</td></tr>
+    <tr><td>enumerate</td><td><code>enumerate(cases, start=1)</code></td><td>How do I number a list?</td></tr>
+    <tr><td>Dates</td><td><code>date.fromisoformat("2025-03-07")</code></td><td>How do I turn text into a real date?</td></tr>
+    <tr><td>Main guard</td><td><code>if __name__ == "__main__":</code></td><td>Was this file run directly?</td></tr>
+  </table></div>
+</section>
+
+<section id="reflect">
+  <div class="kicker">Close the loop</div>
+  <h2>Revisit your first instinct</h2>
+  <p class="intro">At the start of class you wrote one line on what you would do first with Meridian's batch of cases. Write it again now, then answer the exit-ticket questions in your head before opening each one.</p>
+  <div class="row two">
+    <div class="panel">
+      <label for="instinct" style="font-weight:600;display:block;margin-bottom:8px">What would you do first now?</label>
+      <textarea id="instinct" placeholder="Many learners now start by asking what a case is, what counts as evidence, and which part Python can decide."></textarea>
+      <div id="saved" style="color:var(--muted);font-size:.85rem;margin-top:6px" aria-live="polite"></div>
+    </div>
+    <div style="min-width:0" id="exit"></div>
+  </div>
+</section>
+
+<footer>
+  <h2>Next up: can someone else run this?</h2>
+  <p>Right now the answer is no. It depends on your folder, your Python and your files. In Class 2 you turn this script into a project that anyone can clone and run.</p>
+</footer>
+</main>
+
+<script>
+/* ---------- helpers ---------- */
+function esc(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function hi(src){
+  var re=/("""[\s\S]*?""")|(#.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|\b(def|return|if|else|elif|for|in|and|or|not|import|from|with|as|assert|None|True|False)\b|\b(\d+)\b/gm;
+  var out="",last=0,m;
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index));
+    var cls=m[1]?"s":m[2]?"c":m[3]?"s":m[4]?"k":"n";
+    out+='<span class="'+cls+'">'+esc(m[0])+'</span>';
+    last=m.index+m[0].length;
+  }
+  return out+esc(src.slice(last));
+}
+function codeBlock(src){
+  var d=document.createElement("div");d.className="code";
+  var pre=document.createElement("pre");pre.innerHTML=hi(src);
+  var b=document.createElement("button");b.className="cp";b.textContent="Copy";b.setAttribute("aria-label","Copy code");
+  b.onclick=function(){
+    function done(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy"},1400)}
+    function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selected"}
+    try{navigator.clipboard.writeText(src).then(done,fallback)}catch(e){fallback()}
+  };
+  d.appendChild(pre);d.appendChild(b);return d;
+}
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+/* ---------- chapter bar ---------- */
+var chapters=[["try","Run the rule"],["built","What you built"],["notebook","Concepts"],["errors","Errors"],["ai","AI segment"],["quiz","Quiz"],["practice","Practice"],["cheat","Cheat sheet"],["reflect","Reflect"]];
+var chips=document.getElementById("chips");
+chapters.forEach(function(c){var a=document.createElement("a");a.href="#"+c[0];a.textContent=c[1];a.dataset.id=c[0];chips.appendChild(a)});
+function onScroll(){
+  var h=document.documentElement,max=h.scrollHeight-innerHeight;
+  document.getElementById("progfill").style.width=(max>0?Math.min(100,scrollY/max*100):0)+"%";
+  var cur=null;chapters.forEach(function(c){var e=document.getElementById(c[0]);if(e&&e.getBoundingClientRect().top<140)cur=c[0]});
+  chips.querySelectorAll("a").forEach(function(a){var on=a.dataset.id===cur;a.classList.toggle("on",on);if(on&&a.dataset.last!==cur){chips.dataset.cur=cur;a.dataset.last=cur}});
+}
+addEventListener("scroll",onScroll,{passive:true});onScroll();
+
+/* ---------- playground ---------- */
+var CASES=[
+ ["C-1001","O-5001","DELIVERED","2025-03-06"],["C-1002","O-5002","SHIPPED","2025-03-07"],
+ ["C-1003","O-5003","SHIPPED","2025-03-12"],["C-1004","O-5004","PROCESSING","2025-03-08"],
+ ["C-1005","O-5005","SHIPPED","2025-03-06"],["C-1006","O-5006","SHIPPED","2025-03-08"],
+ ["C-1007","O-5007","CANCELLED","2025-03-05"]];
+var BATCH=Date.UTC(2025,2,10);
+function daysOver(t){var p=t.split("-");return Math.round((BATCH-Date.UTC(+p[0],+p[1]-1,+p[2]))/864e5)}
+var ran=false;
+function renderCases(){
+  var closed=document.getElementById("cancelled").checked?["DELIVERED","CANCELLED"]:["DELIVERED"];
+  var list=document.getElementById("caseList");list.innerHTML="";var n=0;
+  CASES.forEach(function(c){
+    var d=daysOver(c[3]),cls="",tag="not run";
+    if(ran){
+      if(closed.indexOf(c[2])>-1){cls="closed";tag="CLOSED"}
+      else if(d>0){cls="flag";tag="OVERDUE · "+d+" days";n++}
+      else{cls="ontime";tag="ON_TIME"}
+    }
+    var e=document.createElement("div");e.className="cc "+cls;
+    e.innerHTML='<span class="id">'+c[0]+'</span><span class="st"><b>'+c[2]+'</b><br>promised '+c[3]+'</span><span class="tag">'+tag+'</span>';
+    list.appendChild(e);
+  });
+  document.getElementById("tally").textContent=ran?(n+" of "+CASES.length+" cases need attention"):"Press Run to decide each case.";
+  var line=document.getElementById("cancelled").checked?'CLOSED_STATUSES = {"DELIVERED", "CANCELLED"}':'CLOSED_STATUSES = {"DELIVERED"}';
+  var src=line+'\n\ndef needs_attention(case, as_of):\n    if case["order_status"] in CLOSED_STATUSES:\n        return False, "CLOSED"\n    if days_overdue(case["promised_date"], as_of) > 0:\n        return True, "OVERDUE_NOT_CLOSED"\n    return False, "ON_TIME"';
+  document.getElementById("liveCode").innerHTML=hi(src).replace(/^(.*CLOSED_STATUSES = .*)$/m,'<span class="hl">$1</span>');
+}
+document.getElementById("run").onclick=function(){ran=true;renderCases()};
+document.getElementById("reset").onclick=function(){ran=false;renderCases()};
+document.getElementById("cancelled").onchange=renderCases;
+renderCases();
+
+/* ---------- concept notebook ---------- */
+var CONCEPTS=[
+ {id:"values",t:"Values and types",s:"variables, str, int, bool, None",
+  plain:"A variable is a name stuck on a value, like a label on a box. Python values come in a few basic types: text (string), whole numbers (integer), numbers with decimals (float), true or false (boolean), and None for nothing here yet.",
+  say:"If you cannot say a rule in a sentence, you cannot code it.",
+  code:'case_id = "C-1002"\ndays_late = 3\nis_open = True\nnote = None\n\nprint(type(days_late))\nprint(f"{case_id} is {days_late} days late")',
+  rem:["Quotes make text. No quotes means a name.","An f-string drops values into text with curly brackets.","<code>\"3\" + 1</code> is a TypeError. Convert one side first."]},
+ {id:"dict",t:"Dictionaries and lists",s:"one case, one batch",
+  plain:"A dictionary holds named pieces of information together, like a form with labelled fields. A list is an ordered collection, like a tray of forms. A batch of cases is a list of dictionaries.",
+  say:"One case goes in. One result comes out. If we ever produce two results for one case_id, or none, something is wrong.",
+  code:'case = {\n    "case_id": "C-1002",\n    "order_id": "O-5002",\n    "order_status": "SHIPPED",\n    "promised_date": "2025-03-07",\n}\nprint(case["order_status"])   # SHIPPED\nprint(case.get("note"))       # None, no error\n\ncases = [\n    {"case_id": "C-1001", "order_status": "DELIVERED"},\n    {"case_id": "C-1002", "order_status": "SHIPPED"},\n]\nprint(cases[1]["order_status"])   # SHIPPED',
+  rem:["Read a value by its label with <code>case[\"label\"]</code>.","Read a list item by its position. Counting starts at 0.","A row in a table is exactly a dictionary: column name is the key, cell is the value."]},
+ {id:"loops",t:"Loops and decisions",s:"for, if, and, counting",
+  plain:"A for loop takes each item in a list, one after another. An if runs its indented lines only when something is true. The word and needs both sides to be true.",
+  say:"A case needs attention when its order is NOT delivered AND it is already late. This is deterministic: same input, same answer.",
+  code:'flagged_count = 0\n\nfor case in cases:\n    if case["order_status"] != "DELIVERED" and case["days_late"] > 0:\n        print(case["case_id"], "needs attention")\n        flagged_count += 1\n\nprint(f"{flagged_count} of {len(cases)} cases need attention")',
+  rem:["<code>=</code> stores a value. <code>==</code> compares two values.","Indentation is how Python knows what belongs inside the loop.","The count starts before the loop and prints after it, so those lines are not indented."]},
+ {id:"funcs",t:"Functions",s:"def, return, tuples, unpacking",
+  plain:"A function gives a set of instructions a name, like a recipe card. Write it once, use it anywhere. Returning a pair lets every answer explain itself.",
+  say:"Return a reason as well as True or False, so anyone reading the result can see why a case was flagged without re-running the code.",
+  code:'def needs_attention(case):\n    """Return (flag, reason). Python decides this, never the model."""\n    if case["order_status"] == "DELIVERED":\n        return False, "CLOSED"\n    if case["days_late"] > 0:\n        return True, "OVERDUE_NOT_CLOSED"\n    return False, "ON_TIME"\n\nflag, reason = needs_attention(cases[1])\nprint(flag)\nprint(reason)',
+  rem:["<code>print</code> only shows a value. <code>return</code> hands it back so other code can use it.","A function with no return on some path gives back <code>None</code>.","<code>flag, reason = …</code> is unpacking: it takes a pair apart."]},
+ {id:"assert",t:"Assertions",s:"proving the rule",
+  plain:"An assertion says: this must be true, and if it is not, stop and tell me. Test on cases where you already know the answer before you trust the function on a whole batch.",
+  say:"This is the habit that becomes pytest in Class 3 and CI in Class 7.",
+  code:'closed = {"order_status": "DELIVERED", "days_late": 0}\nlate = {"order_status": "SHIPPED", "days_late": 3}\non_time = {"order_status": "SHIPPED", "days_late": 0}\n\nassert needs_attention(closed) == (False, "CLOSED")\nassert needs_attention(late) == (True, "OVERDUE_NOT_CLOSED")\nassert needs_attention(on_time) == (False, "ON_TIME")\n\nprint("All rule checks passed")',
+  rem:["A passing assert says nothing. A failing one stops the program with an AssertionError.","Break one on purpose and read the error. Then fix it."]},
+ {id:"files",t:"Reading files",s:"pathlib, with open, csv, json",
+  plain:"pathlib builds file paths that work on every computer. with open opens a file and closes it for you. csv.DictReader turns each row into a dictionary. json.load reads JSON straight into lists and dictionaries.",
+  say:"Everything read from a CSV is text, including numbers and dates.",
+  code:'from pathlib import Path\nimport csv\nimport json\n\nDATA_DIR = Path("data")\nprint((DATA_DIR / "cases.csv").exists())   # True means we found it\n\nwith open(DATA_DIR / "cases.csv", newline="", encoding="utf-8") as f:\n    cases = list(csv.DictReader(f))\n\nwith open(DATA_DIR / "notes.json", encoding="utf-8") as f:\n    notes = json.load(f)\n\nprint(len(cases))       # 7\nprint(cases[0])',
+  rem:["Most \"file not found\" errors mean Python is running in a different folder. Print <code>Path.cwd()</code>.","<code>import</code> takes a toolbox down from the shelf. These ship with Python."]},
+ {id:"toolbox",t:"The toolbox",s:"slicing, set, enumerate, zip, lookup",
+  plain:"Five tiny tools that answer natural questions about your data. Recognise them and know what they are for.",
+  say:"The dictionary lookup is the one the rest of the class needs.",
+  code:'print(cases[:3])        # first three cases\nprint(cases[-1])        # the last case\n\nstatuses = set()        # a set keeps each value once\nfor case in cases:\n    statuses.add(case["order_status"])\nprint(statuses)\n\nfor position, case in enumerate(cases, start=1):\n    print(f"{position}. {case[\'case_id\']}")\n\nnotes_by_case = {}\nfor note in notes:\n    notes_by_case[note["case_id"]] = note\nprint(notes_by_case.get("C-1004"))   # None, no note',
+  rem:["<code>notes_by_case.get(\"C-1004\")</code> gives <code>None</code>. <code>notes_by_case[\"C-1004\"]</code> would be a KeyError.","<code>zip</code> pairs two lists side by side. Try it on the practice sheet."]},
+ {id:"dates",t:"Dates",s:"fromisoformat, subtraction",
+  plain:"Dates from a CSV are text, and Python cannot subtract text. Convert once with date.fromisoformat, then subtract. The order matters: batch date minus promised date is positive when a case is late.",
+  say:"Python decides this part. A rule did it, and we can prove it.",
+  code:'from datetime import date\n\nBATCH_DATE = date(2025, 3, 10)\nCLOSED_STATUSES = {"DELIVERED", "CANCELLED"}\n\ndef days_overdue(promised_date_text, as_of):\n    """Whole days between the promised date and the batch date."""\n    promised = date.fromisoformat(promised_date_text)\n    return (as_of - promised).days\n\nprint(days_overdue("2025-03-07", BATCH_DATE))   # 3',
+  rem:["<code>.days</code> pulls the whole days out of the gap.","<code>in CLOSED_STATUSES</code> asks whether a value is in the set."]},
+ {id:"results",t:"Results and JSON",s:"one result per case_id",
+  plain:"Build one result dictionary per case, check the count and the identifiers, then write the list to a JSON file any other tool can read.",
+  say:"Open the file and pick any case. Can you tell from that one record what was decided and why? That is what evidence-backed means.",
+  code:'results = []\nfor case in cases:\n    flag, reason = needs_attention(case, BATCH_DATE)\n    results.append({\n        "case_id": case["case_id"],\n        "needs_attention": flag,\n        "reason": reason,\n    })\n\nassert len(results) == len(cases)\nassert len(set(r["case_id"] for r in results)) == len(results)\n\nOUTPUT_DIR.mkdir(exist_ok=True)\nwith open(OUTPUT_DIR / "attention_report.json", "w", encoding="utf-8") as f:\n    json.dump(results, f, indent=2)',
+  rem:["<code>.append</code> adds one item to the end of a list.","<code>\"w\"</code> opens a file for writing."]},
+ {id:"main",t:"main and the guard",s:"the front door of a program",
+  plain:"main is a function that holds the work of the program in order: load, decide, save, report. The guard at the bottom runs it only when the file is run directly. Python does not require the name. It is a habit programmers share.",
+  say:"main is the front door of the program, and the guard makes sure only people who walk in through the front door get the full tour.",
+  code:'def run_self_checks():\n    ...   # the three assertions\n\ndef main():\n    ...   # load, decide, save, report\n\nif __name__ == "__main__":\n    run_self_checks()\n    main()',
+  rem:["<code>__name__</code> is <code>\"__main__\"</code> when you run the file, and the file\'s own name when another file imports it.","Other files and tests can import your functions without running the whole program. pytest does this in Class 3.","One clear starting point means a teammate finds their way in seconds.","Predictable behaviour is what lets someone else run your program in Class 2."]}
+];
+var tabs=document.getElementById("tabs"),cpanel=document.getElementById("cpanel");
+function showConcept(i){
+  var c=CONCEPTS[i];
+  tabs.querySelectorAll(".tab").forEach(function(b,j){b.setAttribute("aria-selected",j===i?"true":"false")});
+  cpanel.innerHTML="";
+  var h=document.createElement("h3");h.textContent=c.t;cpanel.appendChild(h);
+  var p=document.createElement("p");p.textContent=c.plain;cpanel.appendChild(p);
+  cpanel.appendChild(codeBlock(c.code));
+  var s=document.createElement("div");s.className="say";s.innerHTML="<b>Say it in class words</b>"+esc(c.say);cpanel.appendChild(s);
+  var ul=document.createElement("ul");ul.className="rem";c.rem.forEach(function(r){var li=document.createElement("li");li.innerHTML=r;ul.appendChild(li)});cpanel.appendChild(ul);
+  store("c1-concept",String(i));
+}
+CONCEPTS.forEach(function(c,i){
+  var b=document.createElement("button");b.className="tab";b.setAttribute("role","tab");b.innerHTML=esc(c.t)+"<small>"+esc(c.s)+"</small>";
+  b.onclick=function(){showConcept(i)};tabs.appendChild(b);
+});
+var startTab=parseInt(store("c1-concept"),10);showConcept(isNaN(startTab)||startTab<0||startTab>=CONCEPTS.length?0:startTab);
+
+/* ---------- traceback ---------- */
+var TB=[
+ {t:"Traceback (most recent call last):",n:0,why:"This is only the heading. It says Python is about to show the path it took. Skip down to the last line."},
+ {t:'  File "attention_report.py", line 63, in <module>\n    flag, reason = needs_attention(case)',n:4,why:"Step 4. Where the function was called. This is the line in your main code that started the trouble."},
+ {t:'  File "attention_report.py", line 22, in needs_attention',n:3,why:"Step 3. The function Python was inside when it failed: needs_attention."},
+ {t:'    if case["days_late"] > 0:',n:2,why:"Step 2. The exact line of code that failed. It asked the dictionary for a label called days_late."},
+ {t:"KeyError: 'days_late'",n:1,why:"Step 1. Start here. The error type is KeyError and the message says which label. The dictionary has no label days_late, because the real CSV has promised_date instead."}
+];
+var tb=document.getElementById("tb"),tbn=document.getElementById("tbn");
+function showTb(i){
+  tb.querySelectorAll(".tbl").forEach(function(b,j){b.setAttribute("aria-pressed",j===i?"true":"false")});
+  tbn.textContent=TB[i].why;
+}
+TB.forEach(function(l,i){
+  var b=document.createElement("button");b.className="tbl";
+  b.innerHTML='<span class="bd">'+(l.n||"·")+'</span><code>'+esc(l.t)+'</code>';
+  b.onclick=function(){showTb(i)};tb.appendChild(b);
+});
+showTb(4);
+
+/* ---------- grounding ---------- */
+var NOTE="Held at depot awaiting address confirmation";
+var spanIn=document.getElementById("span");
+function ground(){
+  var q=spanIn.value,i=NOTE.indexOf(q),ok=q.length>0&&i>-1;
+  document.getElementById("noteBox").innerHTML=(ok?esc(NOTE.slice(0,i))+"<mark>"+esc(q)+"</mark>"+esc(NOTE.slice(i+q.length)):esc(NOTE));
+  document.getElementById("verdict").innerHTML='<span class="verdict '+(ok?"t":"f")+'">evidence_span in note_text  →  '+(ok?"True":"False")+'</span>';
+}
+spanIn.oninput=ground;
+document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){spanIn.value=b.dataset.q;ground()}});
+ground();
+
+/* ---------- quiz ---------- */
+var QUIZ=[
+ {tag:"After Section 3 · one answer",q:"Three cases: DELIVERED with 0 days late, SHIPPED with 3 days late, SHIPPED with 0 days late. What does the last line print?",
+  code:'count = 0\nfor case in cases:\n    if case["order_status"] != "DELIVERED" and case["days_late"] > 0:\n        count += 1\nprint(count)',
+  o:["0","1","2","3"],a:[1],why:"Only the second case passes both parts. The first is DELIVERED. The third fails because 0 > 0 is False. Picking 2 usually means reading and as or."},
+ {tag:"After Section 4 · pick all that apply (two)",q:"Which statements about needs_attention are true?",
+  o:["return only shows a value on the screen, the same as print.",'needs_attention({"order_status": "SHIPPED", "days_late": 3}) gives back (True, "OVERDUE_NOT_CLOSED").',"An assert that passes stops the program and shows an AssertionError.","flag, reason = needs_attention(case) unpacks the pair, so flag holds True or False and reason holds the text."],a:[1,3],why:"return hands a value back, print only shows it. A passing assert is silent, and only a failing one stops the program."},
+ {tag:"After Section 5 · one answer",q:"After cases = list(csv.DictReader(f)), which statement is correct?",
+  o:["cases is a list of lists, one inner list per row.","cases is a dictionary whose keys are the case ids.","cases is a list of dictionaries, and promised_date is already a real date.","cases is a list of dictionaries, and every value in them is text."],a:[3],why:"DictReader makes one dictionary per row, and a CSV only holds text. That is why dates are converted in Section 8."},
+ {tag:"After Section 7 · pick all that apply (two)",q:"A program stops with KeyError: 'days_late'. Which statements are correct?",
+  o:["It stopped because data/cases.csv could not be found.","Reading from the last line, Python is saying the dictionary has no label called days_late.",'case.get("days_late") returns None instead of raising a KeyError.',"The best place to start reading a traceback is the first line."],a:[1,2],why:"A missing file gives FileNotFoundError. The last line says what went wrong, so you read upwards from there. Note that .get only moves the problem, because None > 0 is itself an error."},
+ {tag:"After Section 9 · one answer",q:'BATCH_DATE is date(2025, 3, 10). A case has promised_date "2025-03-07" as text. Which expression gives 3?',
+  o:['BATCH_DATE - "2025-03-07"','(date.fromisoformat("2025-03-07") - BATCH_DATE).days','(BATCH_DATE - date.fromisoformat("2025-03-07")).days','BATCH_DATE.days - 7'],a:[2],why:"Convert the text to a real date, subtract the promised date from the batch date, then take .days. The second option has the order reversed and gives -3."},
+ {tag:"After Section 10 · pick all that apply (two)",q:"Which statements are true about how the model is used in V0?",
+  o:["Python's rule decides whether a case needs attention. The model only suggests what a note means.","Today's class sends each note to a live model through an API call.","evidence_span in note_text being True shows the quoted words really appear in the note.",'For the note "see previous", a good response is a confident guess at the issue family.'],a:[0,2],why:"Class 1 uses recorded responses only. For a note that says \"see previous\" there is not enough information, so the right behaviour is to abstain."}
+];
+var quizBox=document.getElementById("quizBox"),got={};
+function scoreText(){var n=0;for(var k in got)if(got[k])n++;document.getElementById("score").textContent="Score: "+n+" of "+QUIZ.length}
+QUIZ.forEach(function(q,qi){
+  var multi=q.a.length>1,box=document.createElement("div");box.className="panel q";
+  var h='<div class="qh"><span>Question '+(qi+1)+'</span><span>'+q.tag+'</span></div><div class="qt">'+esc(q.q)+'</div>';
+  box.innerHTML=h;
+  if(q.code)box.appendChild(codeBlock(q.code));
+  var opts=document.createElement("div");opts.className="opts";
+  q.o.forEach(function(o,oi){
+    var l=document.createElement("label");l.className="opt";
+    l.innerHTML='<input type="'+(multi?"checkbox":"radio")+'" name="q'+qi+'" id="q'+qi+'o'+oi+'" value="'+oi+'"><span>'+esc(o)+'</span>';
+    opts.appendChild(l);
+  });
+  box.appendChild(opts);
+  var btn=document.createElement("button");btn.className="btn";btn.textContent="Check";box.appendChild(btn);
+  var fb=document.createElement("div");fb.setAttribute("aria-live","polite");box.appendChild(fb);
+  btn.onclick=function(){
+    var sel=[];opts.querySelectorAll("input").forEach(function(i){if(i.checked)sel.push(+i.value)});
+    if(!sel.length){fb.innerHTML='<div class="fb bad">Pick '+(multi?"at least one answer":"an answer")+' first.</div>';return}
+    var ok=sel.length===q.a.length&&sel.every(function(v){return q.a.indexOf(v)>-1});
+    opts.querySelectorAll(".opt").forEach(function(l,i){l.classList.remove("right","wrong");if(q.a.indexOf(i)>-1)l.classList.add("right");else if(sel.indexOf(i)>-1)l.classList.add("wrong")});
+    fb.innerHTML='<div class="fb '+(ok?"good":"bad")+'"><b>'+(ok?"Right. ":"Not quite. ")+'</b>'+esc(q.why)+'</div>';
+    got[qi]=ok;scoreText();
+  };
+  quizBox.appendChild(box);
+});
+
+/* ---------- practice ---------- */
+var TASKS=[
+ ["Print the last three cases.","Slicing",'print(cases[-3:])',"A negative start counts from the end, so <code>[-3:]</code> means the last three."],
+ ["How many different statuses are in the batch? Print the number.","Set",'statuses = set()\nfor case in cases:\n    statuses.add(case["order_status"])\nprint(len(statuses))   # 4',"DELIVERED, SHIPPED, PROCESSING and CANCELLED. A set keeps each value once."],
+ ["Make a tuple of (case_id, order_status) for the second case, then unpack it into two variables and print them.","Tuple and unpacking",'pair = (cases[1]["case_id"], cases[1]["order_status"])\ncase_id, status = pair\nprint(case_id, status)   # C-1002 SHIPPED',"Unpacking puts each half of the pair in its own variable."],
+ ['Print each case as "1. C-1001: DELIVERED", numbering from 1.',"enumerate and f-strings",'for position, case in enumerate(cases, start=1):\n    print(f"{position}. {case[\'case_id\']}: {case[\'order_status\']}")',"<code>start=1</code> makes the count begin at 1 instead of 0."],
+ ["Pair each case_id with its promised_date and print the pairs.","zip",'case_ids = []\ndates = []\nfor case in cases:\n    case_ids.append(case["case_id"])\n    dates.append(case["promised_date"])\n\nfor case_id, promised in zip(case_ids, dates):\n    print(case_id, promised)',"<code>zip</code> walks two lists together, one item from each at a time."],
+ ['For C-1006 and C-1003, print the note text, or "No note" when there is none.',"Dictionary lookup and if",'for case_id in ["C-1006", "C-1003"]:\n    note = notes_by_case.get(case_id)\n    if note:\n        print(note["text"])\n    else:\n        print("No note")',"C-1006 prints <code>cust n/a x2, rtn to dpt</code>. C-1003 has no note, so it prints No note."],
+ ["Change CLOSED_STATUSES so that only DELIVERED counts as closed. Which case changes, and why?","Sets and reading output",'CLOSED_STATUSES = {"DELIVERED"}',"C-1007 changes. It is CANCELLED and its promised date, 2025-03-05, is five days before the batch date, so it is now flagged. You can see this in the playground at the top of this page."],
+ ["Write a plain-words rule for what should happen to a CANCELLED order, in one sentence.","Saying the rule first",null,"One good answer: a CANCELLED order needs no attention, because there is nothing left to deliver. Any clear sentence is fine. The habit is to say the rule before you code it."]
+];
+var tasks=document.getElementById("tasks");
+TASKS.forEach(function(t,i){
+  var d=document.createElement("details");d.className="task";
+  d.innerHTML='<summary><span class="no">'+(i+1)+'</span><span>'+esc(t[0])+'</span><span class="tool">'+esc(t[1])+'</span></summary>';
+  var a=document.createElement("div");a.className="ans";
+  if(t[2])a.appendChild(codeBlock(t[2]));
+  var p=document.createElement("p");p.style.margin="0";p.innerHTML=t[3];a.appendChild(p);
+  d.appendChild(a);tasks.appendChild(d);
+});
+
+/* ---------- reflection ---------- */
+var ta=document.getElementById("instinct"),savedEl=document.getElementById("saved");
+var prev=store("c1-instinct");if(prev)ta.value=prev;
+ta.oninput=function(){store("c1-instinct",ta.value);savedEl.textContent="Saved in this browser only."};
+var EXIT=[
+ ["Why is case_id, not order_id, our unit of work?","The support team works in cases. One case goes in and one result comes out, and every result is tied to a case_id."],
+ ["Which part of V0 decides whether a case needs attention?","The Python rule, needs_attention. Never the model."],
+ ["Name one thing that makes a model suggestion good.","Any of: the correct issue family, grounded evidence, no invented fact, appropriate abstention."],
+ ["What does a traceback's last line tell you?","The error type and its message, such as KeyError: 'days_late'. Start reading there."]
+];
+var exitEl=document.getElementById("exit");
+exitEl.innerHTML='<h3 style="margin-bottom:10px">Exit ticket</h3>';
+EXIT.forEach(function(e){
+  var d=document.createElement("details");d.className="task";
+  d.innerHTML='<summary><span>'+esc(e[0])+'</span></summary><div class="ans" style="margin:0"><p style="margin:0">'+esc(e[1])+'</p></div>';
+  exitEl.appendChild(d);
+});
+</script>
